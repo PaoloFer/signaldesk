@@ -144,6 +144,7 @@ Deployment guide: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 ## Tests
 
 ```powershell
+pip install -r requirements-dev.txt
 python -m pytest tests/ -q
 ```
 
