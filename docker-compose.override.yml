@@ -1,0 +1,16 @@
+services:
+  app:
+    ports:
+      - "${APP_PORT:-8090}:8090"
+    environment:
+      APP_ENV: development
+      COOKIE_SECURE: "false"
+      PUBLIC_ORIGIN: http://127.0.0.1:${APP_PORT:-8090}
+      ALLOWED_HOSTS: 127.0.0.1,localhost
+
+  worker:
+    environment:
+      APP_ENV: development
+      COOKIE_SECURE: "false"
+      PUBLIC_ORIGIN: http://127.0.0.1:${APP_PORT:-8090}
+      ALLOWED_HOSTS: 127.0.0.1,localhost

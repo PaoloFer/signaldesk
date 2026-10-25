@@ -1,0 +1,99 @@
+x-app-environment: &app-environment
+  APP_ENV: ${APP_ENV:-production}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-signaldesk}:${POSTGRES_PASSWORD:-signaldesk}@postgres:5432/${POSTGRES_DB:-signaldesk}
+  REDIS_URL: redis://redis:6379/0
+  COOKIE_SECURE: ${COOKIE_SECURE:-true}
+  SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+  RUN_INLINE_WORKER: "false"
+  AUTO_REFRESH_HOURS: ${AUTO_REFRESH_HOURS:-6}
+  ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+  PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-}
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
+  PUBLIC_PREVIEW_ENABLED: ${PUBLIC_PREVIEW_ENABLED:-false}
+  PUBLIC_PREVIEW_DAILY_LIMIT: ${PUBLIC_PREVIEW_DAILY_LIMIT:-2}
+  PUBLIC_PREVIEW_MAX_CHANNELS: ${PUBLIC_PREVIEW_MAX_CHANNELS:-100}
+  YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+  PSEUDONYM_SALT: ${PSEUDONYM_SALT:-}
+  SEMANTIC_ENGINE: ${SEMANTIC_ENGINE:-tfidf}
+  SEMANTIC_EMBEDDING_MODEL: ${SEMANTIC_EMBEDDING_MODEL:-paraphrase-multilingual-MiniLM-L12-v2}
+  SEMANTIC_LABEL_LLM_URL: ${SEMANTIC_LABEL_LLM_URL:-}
+  SEMANTIC_LABEL_LLM_API_KEY: ${SEMANTIC_LABEL_LLM_API_KEY:-}
+  SEMANTIC_LABEL_LLM_MODEL: ${SEMANTIC_LABEL_LLM_MODEL:-}
+  SEMANTIC_LABEL_LLM_TIMEOUT: ${SEMANTIC_LABEL_LLM_TIMEOUT:-10}
+
+x-app-common: &app-common
+  image: ${SIGNALDESK_IMAGE:-signaldesk:local}
+  build: .
+  environment: *app-environment
+  restart: unless-stopped
+
+services:
+  migrate:
+    <<: *app-common
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    <<: *app-common
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8090", "--proxy-headers", "--forwarded-allow-ips=*"]
+    expose:
+      - "8090"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/api/health', timeout=2)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  worker:
+    <<: *app-common
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-signaldesk}
+      POSTGRES_USER: ${POSTGRES_USER:-signaldesk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-signaldesk}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-signaldesk} -d ${POSTGRES_DB:-signaldesk}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

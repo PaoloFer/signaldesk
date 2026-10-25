@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Local data and generated artifacts
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+backups/
+reports/
+*.log
+
+# Local planning and career notes
+PLAN_*.md
+MILESTONES.md
+RESUME_PROJECT_REPORT.md
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# JavaScript tooling
+node_modules/
+dist/
+build/

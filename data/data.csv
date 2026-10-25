@@ -1,0 +1,5 @@
+external_id,content_id,author_hash,text,published_at,content_title,platform,niche,topic
+c001,video-10,user-a,Questo prodotto non funziona,2026-09-17T18:01:00+00:00,Recensione prodotto,YouTube,Tecnologia,Recensioni
+c002,video-10,user-b,Questo prodotto non funziona,2026-09-17T18:02:00+00:00,Recensione prodotto,YouTube,Tecnologia,Recensioni
+c003,video-10,user-c,Questo prodotto non funziona,2026-09-17T18:03:00+00:00,Recensione prodotto,YouTube,Tecnologia,Recensioni
+c004,video-10,user-d,Qualcuno ha provato un'alternativa?,2026-09-17T18:04:00+00:00,Recensione prodotto,YouTube,Tecnologia,Alternative

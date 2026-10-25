@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analyze Niche Beta | SignalDesk</title>
+  <meta name="description" content="Inserisci un argomento, alcuni canali o video. SignalDesk costruisce un campione di canali e mostra metriche, contenuti, formati e segnali osservati.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="/try">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/try.css?v=1">
+</head>
+<body>
+  <header class="try-header">
+    <a class="brand" href="/"><span>S</span>SignalDesk</a>
+    <div><span class="beta-label">PUBLIC BETA</span><a href="/login">Accedi</a></div>
+  </header>
+
+  <main>
+    <section class="try-intro">
+      <p class="eyebrow">ANALYZE NICHE / PREVIEW GRATUITA</p>
+      <h1>Esplora un argomento.<br><em>Guarda cosa emerge.</em></h1>
+      <p>Inserisci un argomento, alcuni canali o video. SignalDesk costruisce un campione fino a 100 canali e mostra metriche, contenuti, formati e segnali osservati.</p>
+    </section>
+
+    <section class="search-workbench" aria-labelledby="search-title">
+      <div class="workbench-copy">
+        <span>01 / DEFINISCI IL CAMPIONE</span>
+        <h2 id="search-title">Da dove vuoi partire?</h2>
+        <p>La preview usa dati pubblici YouTube e non salva il risultato. Regione e lingua orientano la ricerca, ma non sono filtri assoluti.</p>
+        <div class="scope-list">
+          <p><b>Incluso</b> Canali, video, views, formati e termini ricorrenti</p>
+          <p><b>Escluso</b> Commenti, transcript e interpretazioni definitive</p>
+        </div>
+      </div>
+      <form id="public-analysis-form">
+        <label class="wide"><span>ARGOMENTO</span><input id="topic" maxlength="100" placeholder="es. pianoforte per principianti" required></label>
+        <label><span>REGIONE</span><input id="region" maxlength="2" value="IT" placeholder="IT"></label>
+        <label><span>LINGUA</span><input id="language" maxlength="2" value="it" placeholder="it"></label>
+        <label><span>PERIODO</span><select id="days"><option value="30">30 giorni</option><option value="90" selected>90 giorni</option><option value="365">12 mesi</option></select></label>
+        <label><span>CANALI MASSIMI</span><select id="max-channels"><option value="25">25</option><option value="50" selected>50</option><option value="100">100</option></select></label>
+        <label class="wide"><span>CANALI SEED, MASSIMO 2 (opzionale)</span><textarea id="channels" rows="2" placeholder="@handle o URL, uno per riga"></textarea></label>
+        <label class="wide"><span>VIDEO SEED, MASSIMO 3 (opzionale)</span><textarea id="videos" rows="2" placeholder="URL o ID, uno per riga"></textarea></label>
+        <button id="analyze-button" type="submit">Crea la prima analisi →</button>
+        <small>La ricerca può richiedere alcune decine di secondi. Le analisi anonime sono limitate giornalmente.</small>
+      </form>
+    </section>
+
+    <section id="analysis-progress" class="analysis-progress" hidden aria-live="polite">
+      <div><span>RICERCA IN CORSO</span><strong id="progress-title">Interrogo le fonti pubbliche...</strong></div>
+      <i><b></b></i>
+      <p>Risoluzione seed, raccolta video e aggregazione per canale.</p>
+    </section>
+
+    <section id="analysis-error" class="analysis-error" hidden role="alert"></section>
+
+    <section id="analysis-results" class="analysis-results" hidden>
+      <header class="result-heading">
+        <div><p class="eyebrow">02 / CAMPIONE OSSERVATO</p><h2 id="result-title">Risultati</h2></div>
+        <p id="result-notice"></p>
+      </header>
+
+      <div id="coverage-strip" class="coverage-strip"></div>
+      <div id="metric-grid" class="metric-grid"></div>
+
+      <div class="visual-grid">
+        <section class="visual-panel">
+          <div class="panel-heading"><h3>Termini ricorrenti</h3><span>presenza nei documenti</span></div>
+          <div id="term-chart" class="rank-chart"></div>
+        </section>
+        <section class="visual-panel">
+          <div class="panel-heading"><h3>Formati osservati</h3><span>durata dei video</span></div>
+          <div id="format-chart" class="rank-chart accent"></div>
+        </section>
+      </div>
+
+      <section class="channel-explorer">
+        <div class="panel-heading channel-heading">
+          <div><h3>Canali nel campione</h3><span id="channel-summary"></span></div>
+          <div class="channel-controls">
+            <input id="channel-filter" type="search" placeholder="Filtra canali...">
+            <select id="channel-sort">
+              <option value="match">Più pertinenti</option>
+              <option value="newest">Più recenti</option>
+              <option value="views">Views medie</option>
+              <option value="subscribers">Iscritti</option>
+              <option value="engagement">Engagement</option>
+            </select>
+          </div>
+        </div>
+        <div id="channel-list" class="channel-list"></div>
+      </section>
+
+      <section class="account-gate">
+        <div><p class="eyebrow">CONTINUA L'ANALISI</p><h2>Questa preview non viene salvata.</h2><p>Accedi per conservare il corpus, esportare i dati, approfondire i commenti e monitorare la nicchia nel tempo.</p></div>
+        <a href="/login">Accedi o crea un account →</a>
+      </section>
+    </section>
+  </main>
+
+  <footer><a class="brand" href="/"><span>S</span>SignalDesk</a><p>Dati pubblici, campione dichiarato, nessun verdetto automatico.</p></footer>
+  <script src="/static/try.js?v=1"></script>
+</body>
+</html>

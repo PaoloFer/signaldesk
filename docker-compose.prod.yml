@@ -1,0 +1,38 @@
+services:
+  app:
+    environment:
+      APP_ENV: production
+      COOKIE_SECURE: "true"
+      PUBLIC_ORIGIN: https://${DEPLOY_DOMAIN:?DEPLOY_DOMAIN is required}
+      ALLOWED_HOSTS: ${DEPLOY_DOMAIN:?DEPLOY_DOMAIN is required},localhost,app
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-false}
+
+  worker:
+    environment:
+      APP_ENV: production
+      COOKIE_SECURE: "true"
+      PUBLIC_ORIGIN: https://${DEPLOY_DOMAIN:?DEPLOY_DOMAIN is required}
+      ALLOWED_HOSTS: ${DEPLOY_DOMAIN:?DEPLOY_DOMAIN is required},localhost,app
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-false}
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      DEPLOY_DOMAIN: ${DEPLOY_DOMAIN:?DEPLOY_DOMAIN is required}
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL is required}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

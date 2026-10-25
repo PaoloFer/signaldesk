@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SignalDesk · Accesso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=20260917-14">
+</head>
+<body class="auth-body">
+  <main class="auth-shell">
+    <section class="auth-intro">
+      <a class="brand" href="/"><span class="brand-mark">S</span><span>SignalDesk<small>Social Intelligence Lab</small></span></a>
+      <div><p class="eyebrow">OSSERVARE · COLLEGARE · INDAGARE</p><h1>Il contesto prima<br><em>della conclusione.</em></h1></div>
+      <p>Costruisci corpus social separati, monitora le traiettorie e conserva sempre la provenienza delle evidenze.</p>
+    </section>
+    <section class="auth-card">
+      <div class="auth-tabs"><button class="active" data-mode="login">Accedi</button><button data-mode="register">Crea account</button></div>
+      <form id="auth-form">
+        <div><p class="eyebrow" id="auth-eyebrow">AREA RISERVATA</p><h2 id="auth-title">Bentornato</h2></div>
+        <label><span>EMAIL</span><input id="auth-email" type="email" autocomplete="email" required></label>
+        <label><span>PASSWORD</span><input id="auth-password" type="password" minlength="10" autocomplete="current-password" required></label>
+        <label id="organization-field" hidden><span>ORGANIZZAZIONE</span><input id="auth-organization" maxlength="80" placeholder="es. Studio North"></label>
+        <p class="auth-error" id="auth-error"></p>
+        <button type="submit" id="auth-submit">Accedi →</button>
+      </form>
+      <small>Le sessioni sono conservate server-side. La password non viene mai salvata in chiaro.</small>
+    </section>
+  </main>
+  <script src="/static/login.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SignalDesk · Social Intelligence Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=20260918-30">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#overview"><span class="brand-mark">S</span><span>SignalDesk<small>Social Intelligence Lab</small></span></a>
+    <nav>
+      <a class="active" href="#overview"><span>01</span> Osservatorio</a>
+      <a href="#landscape"><span>02</span> Content Landscape</a>
+      <a href="#adv"><span>03</span> Adv Intelligence</a>
+      <a href="#integrity"><span>04</span> Integrity Monitor</a>
+      <a href="#niches"><span>05</span> Niche Explorer</a>
+      <a href="#method"><span>06</span> Metodo</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-session"><span id="session-email">Account</span><button id="account-button" type="button">Account</button><button id="logout-button" type="button">Esci</button></div>
+      <div class="pulse"><i></i> Dataset locale attivo</div>
+      <button id="open-project-hub" class="project-hub-button" type="button">Gestione progetti</button>
+      <label class="import-button" for="csv-input">Importa commenti CSV</label>
+      <input id="csv-input" type="file" accept=".csv" hidden>
+      <label class="import-button secondary" for="content-csv-input">Importa contenuti CSV</label>
+      <input id="content-csv-input" type="file" accept=".csv" hidden>
+      <small id="import-status">Gli autori sono mostrati con ID pseudonimi.</small>
+    </div>
+  </aside>
+
+  <section id="project-hub" class="app-view" hidden>
+    <header>
+      <div>
+        <p class="eyebrow">WORKSPACE</p>
+        <h1>I tuoi progetti</h1>
+      </div>
+      <div class="status"><span>LAB</span> <b>SignalDesk</b></div>
+    </header>
+    <div id="project-hub-content">
+      <div class="hub-empty" id="hub-empty" hidden>
+        <h2>Benvenuto su SignalDesk</h2>
+        <p>Per iniziare a osservare una conversazione sociale crea il tuo primo progetto.</p>
+        <button id="hub-new-project-empty" type="button">+ Crea il tuo primo progetto</button>
+      </div>
+      <div class="hub-with-projects" id="hub-with-projects" hidden>
+        <p class="hub-intro">Seleziona un progetto esistente o creane uno nuovo.</p>
+        <div class="project-hub-grid" id="project-hub-grid"></div>
+        <button id="hub-new-project" class="hub-new-button" type="button">+ Nuovo progetto</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="onboarding-wizard" class="app-view" hidden>
+    <div class="wizard-shell">
+      <div class="wizard-header">
+        <p class="eyebrow">ONBOARDING</p>
+        <h1 id="wizard-title">Crea il tuo progetto</h1>
+        <div class="wizard-steps" id="wizard-steps">
+          <span class="active" data-step="1">1. Progetto</span>
+          <span data-step="2">2. Nicchia</span>
+          <span data-step="3">3. Candidati</span>
+          <span data-step="4">4. Acquisizione</span>
+        </div>
+      </div>
+      <div class="wizard-body" id="wizard-body">
+        <div class="wizard-step active" data-step="1">
+          <h2>Dai un nome al progetto</h2>
+          <p class="wizard-hint">Il progetto è il contenitore dei bacini di conversazione che vuoi osservare.</p>
+          <label><span>NOME PROGETTO</span><input id="wizard-project-name" maxlength="80" placeholder="es. Running Italia" required></label>
+          <label><span>DESCRIZIONE</span><textarea id="wizard-project-description" maxlength="300" placeholder="Obiettivo e perimetro della ricerca"></textarea></label>
+        </div>
+        <div class="wizard-step" data-step="2" hidden>
+          <h2>Definisci la nicchia</h2>
+          <p class="wizard-hint">I seed definiscono il bacino iniziale. Puoi aggiungere più nicchie dopo.</p>
+          <fieldset class="wizard-mode-picker">
+            <legend>MODALITÀ DI ANALISI</legend>
+            <label><input id="wizard-mode-videos" type="radio" name="wizard-mode" value="videos" checked><span><strong>Video</strong>Seleziona contenuti da acquisire e analizzare.</span></label>
+            <label><input id="wizard-mode-channels" type="radio" name="wizard-mode" value="channels"><span><strong>Panorama</strong>Costruisci un bacino di canali, temi e cerchi emergenti.</span></label>
+          </fieldset>
+          <label><span>NOME NICCHIA</span><input id="wizard-niche-name" maxlength="80" placeholder="es. Corsa amatoriale" required></label>
+          <label><span>DESCRIZIONE</span><textarea id="wizard-niche-description" maxlength="300" placeholder="Perimetro e obiettivo"></textarea></label>
+          <label class="wide"><span>CANALI SEME (ID UC..., @handle o URL, uno per riga)</span><textarea id="wizard-niche-channels" rows="3" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx&#10;@marcelloascani&#10;https://youtube.com/@marcelloascani"></textarea></label>
+          <label class="wide"><span>VIDEO SEME (URL o ID, uno per riga)</span><textarea id="wizard-niche-videos" rows="2" placeholder="https://youtu.be/..."></textarea></label>
+          <label class="wide"><span>KEYWORD INCLUSE</span><input id="wizard-niche-include" placeholder="allenamento, principianti, scarpe"></label>
+          <label class="wide"><span>KEYWORD ESCLUSE</span><input id="wizard-niche-exclude" placeholder="maratona, professionisti"></label>
+          <fieldset class="collection-filters">
+            <legend>FILTRI DI RACCOLTA</legend>
+            <label><span>FINESTRA</span><select id="wizard-niche-days"><option value="30">30 giorni</option><option value="90" selected>90 giorni</option><option value="365">1 anno</option></select></label>
+            <label><span>MAX RISULTATI</span><input id="wizard-niche-max-results" type="number" min="10" max="500" value="200"></label>
+            <label><span>MIN VIEWS VIDEO</span><input id="wizard-niche-min-views" type="number" min="0" value="0"></label>
+            <label data-panorama-only hidden><span>TOP CANALI</span><select id="wizard-niche-top-channels"><option value="false" selected>Solo canali con match</option><option value="true">Includi i più osservati</option></select></label>
+          </fieldset>
+          <fieldset class="geo-filters">
+            <legend>PERIMETRO GEO-LINGUISTICO (opzionale)</legend>
+            <p class="wizard-hint">Utile per nicchie trasversali come "influencer italiani": orienta la ricerca verso un paese e valuta paese, lingua e iscritti dichiarati dai canali.</p>
+            <label><span>REGIONE (es. IT)</span><input id="wizard-niche-region" maxlength="2" placeholder="IT"></label>
+            <label><span>LINGUA (es. it)</span><input id="wizard-niche-language" maxlength="2" placeholder="it"></label>
+            <label><span>MIN ISCRITTI CANALE</span><input id="wizard-niche-min-subs" type="number" min="0" value="0"></label>
+            <label><span>MAX ISCRITTI CANALE</span><input id="wizard-niche-max-subs" type="number" min="0" placeholder="Nessun limite"></label>
+            <label class="wide"><span>POPOLARI REGIONALI</span><select id="wizard-niche-popular"><option value="false" selected>Solo seed</option><option value="true">Includi i video più popolari nella regione</option></select></label>
+            <label class="wide"><span>CANALI FUORI PERIMETRO</span><select id="wizard-niche-strict"><option value="false" selected>Ammessi, con rilevanza ridotta</option><option value="true">Esclusi se paese o lingua dichiarati non corrispondono</option></select></label>
+          </fieldset>
+          <details class="advanced-panorama" data-panorama-only hidden>
+            <summary>Ranking avanzato e profondità</summary>
+            <div class="advanced-panorama-grid">
+              <label><span>PROFONDITÀ EVIDENZE</span><select id="wizard-evidence-depth"><option value="P1">P1 · titoli</option><option value="P2" selected>P2 · metadati</option><option value="P3">P3 · evidenze estese</option></select></label>
+              <label><span>SECONDA ONDATA</span><select id="wizard-second-wave"><option value="0" selected>Disattivata</option><option value="1">Top 1 canale</option><option value="3">Top 3 canali</option><option value="5">Top 5 canali</option></select></label>
+              <label class="toggle-label"><input id="wizard-cross-theme" type="checkbox"><span>Ranking cross-theme</span></label>
+              <div class="weight-grid">
+                <label><span>TEMA</span><input id="wizard-weight-theme" type="number" min="0" step="0.1" value="1"></label>
+                <label><span>GEO</span><input id="wizard-weight-geo" type="number" min="0" step="0.1" value="0.5"></label>
+                <label><span>DIMENSIONE</span><input id="wizard-weight-size" type="number" min="0" step="0.1" value="0.3"></label>
+                <label><span>POPOLARITÀ</span><input id="wizard-weight-popularity" type="number" min="0" step="0.1" value="0.3"></label>
+                <label><span>ENGAGEMENT</span><input id="wizard-weight-engagement" type="number" min="0" step="0.1" value="0.5"></label>
+                <label><span>VELOCITÀ</span><input id="wizard-weight-velocity" type="number" min="0" step="0.1" value="0.4"></label>
+              </div>
+            </div>
+          </details>
+          <div id="wizard-quota-estimate" class="wizard-quota" aria-live="polite"></div>
+        </div>
+        <div class="wizard-step" data-step="3" hidden>
+          <h2 id="wizard-preview-title">Seleziona i contenuti</h2>
+          <p class="wizard-hint" id="wizard-preview-hint">Filtra e scegli i video da importare nel progetto. Solo i selezionati verranno acquisiti.</p>
+          <div class="wizard-preview-controls">
+            <label data-video-filter><span>MIN VIEWS</span><input id="preview-min-views" type="number" min="0" value="0"></label>
+            <label data-channel-filter hidden><span>ISCRITTI MIN</span><input id="preview-min-subs" type="number" min="0" value="0"></label>
+            <label data-channel-filter hidden><span>ISCRITTI MAX</span><input id="preview-max-subs" type="number" min="0" placeholder="Nessun limite"></label>
+            <label data-channel-filter hidden><span>VIEWS MEDIE MIN</span><input id="preview-channel-min-views" type="number" min="0" value="0"></label>
+            <label data-channel-filter hidden><span>VIEWS MEDIE MAX</span><input id="preview-channel-max-views" type="number" min="0" placeholder="Nessun limite"></label>
+            <label><span>MIN SCORE</span><input id="preview-min-score" type="number" min="0" max="3" step="0.1" value="0"></label>
+            <label data-channel-filter hidden><span>TEMI INCLUSI</span><input id="preview-themes-include" placeholder="cucina, tecnologia"></label>
+            <label data-channel-filter hidden><span>TEMI ESCLUSI</span><input id="preview-themes-exclude" placeholder="gaming, musica"></label>
+            <label class="toggle-label" data-channel-filter hidden><input id="preview-promoted-only" type="checkbox"><span>Solo promossi</span></label>
+            <label class="wide"><span>FILTRA PER TESTO</span><input id="preview-text-filter" placeholder="titolo, canale, keyword..."></label>
+            <button id="preview-search" type="button">Cerca candidati</button>
+          </div>
+          <div id="panorama-facets" class="panorama-facets" hidden></div>
+          <div class="wizard-preview-actions">
+            <button id="preview-select-all" type="button">Seleziona tutti</button>
+            <button id="preview-deselect-all" type="button">Deseleziona tutti</button>
+            <span id="preview-selection-count">0 selezionati</span>
+          </div>
+          <div class="wizard-preview-table" id="wizard-preview-table">
+            <p class="empty">Clicca "Cerca candidati" per vedere i video trovati dai seed.</p>
+          </div>
+          <div class="wizard-options" id="wizard-video-options">
+            <label class="wide"><span>COMMENTI AUTO</span><select id="wizard-populate-comments"><option value="true" selected>Acquisisci automaticamente i commenti dai video selezionati</option><option value="false">Solo video, nessun commento</option></select></label>
+            <div class="wizard-row">
+              <label><span>MAX VIDEO CON COMMENTI</span><select id="wizard-populate-max-videos"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select></label>
+              <label><span>COMMENTI / VIDEO</span><select id="wizard-populate-comments-per-video"><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select></label>
+            </div>
+          </div>
+        </div>
+        <div class="wizard-step" data-step="4" hidden>
+          <h2 id="wizard-final-title">Acquisizione in corso</h2>
+          <p class="wizard-hint" id="wizard-final-hint">I contenuti selezionati vengono salvati e, se abilitato, i commenti acquisiti e analizzati.</p>
+          <div class="wizard-summary" id="wizard-summary"></div>
+          <div id="wizard-materialize-actions" class="wizard-materialize-actions" hidden>
+            <button id="materialize-curated" type="button"><strong>Curated</strong><span>Salva solo i canali selezionati.</span></button>
+            <button id="materialize-rule-based" type="button"><strong>Rule-based</strong><span>Salva le regole e rivaluta il bacino nel tempo.</span></button>
+          </div>
+          <div class="wizard-job" id="wizard-job-status"></div>
+        </div>
+      </div>
+      <div class="wizard-actions">
+        <button id="wizard-back" type="button">Indietro</button>
+        <button id="wizard-next" type="button">Avanti</button>
+      </div>
+      <p class="dialog-error" id="wizard-error"></p>
+    </div>
+  </section>
+
+  <main id="overview" class="app-view">
+    <header>
+      <div>
+        <p class="eyebrow">OSSERVATORIO / ULTIMI 14 GIORNI / <span id="today"></span></p>
+        <h1>Osserva la conversazione.<br><em>L'interpretazione resta tua.</em></h1>
+      </div>
+      <div class="status"><span>LAB</span> <b id="header-project">Caricamento progetto...</b><button id="header-projects" type="button" class="header-projects">Progetti</button></div>
+    </header>
+
+    <section class="control-bar" aria-label="Filtri del report">
+      <label><span>PROGETTO</span><select id="project-filter"></select></label>
+      <label><span>PERIODO</span><select id="period-filter"><option value="1">24 ore</option><option value="7">7 giorni</option><option value="14" selected>14 giorni</option><option value="30">30 giorni</option><option value="90">90 giorni</option></select></label>
+      <label><span>NICCHIA</span><select id="niche-filter"><option value="">Tutte le nicchie</option></select></label>
+      <div class="project-actions"><button id="new-project" type="button">Nuovo progetto</button><button id="delete-project" type="button" title="Elimina progetto">×</button></div>
+      <button id="manage-niches" type="button">Gestisci nicchie</button>
+      <button id="reset-filters" type="button">Azzera filtri</button>
+      <small id="filter-status">Dataset completo</small>
+    </section>
+
+    <aside class="data-reading-guide" aria-label="Legenda di lettura dei dati">
+      <div><span class="data-kind observed">OSSERVATO</span><p>Valore presente direttamente nelle fonti acquisite.</p></div>
+      <div><span class="data-kind calculated">CALCOLATO</span><p>Misura riproducibile derivata dal corpus selezionato.</p></div>
+      <div><span class="data-kind heuristic">EURISTICO</span><p>Segnale da verificare: orienta l'analisi, non è un verdetto.</p></div>
+      <small>I risultati descrivono il campione raccolto, non l'intera piattaforma.</small>
+    </aside>
+
+    <dialog id="account-dialog">
+      <form id="password-form">
+        <div><p class="eyebrow">ACCOUNT</p><h2>Cambia password</h2></div>
+        <label><span>PASSWORD ATTUALE</span><input id="password-current" type="password" autocomplete="current-password" required></label>
+        <label><span>NUOVA PASSWORD (minimo 10 caratteri)</span><input id="password-new" type="password" autocomplete="new-password" minlength="10" required></label>
+        <p class="dialog-error" id="password-error"></p>
+        <p class="dialog-ok" id="password-ok"></p>
+        <div class="dialog-actions"><button id="cancel-account" type="button">Chiudi</button><button type="submit">Cambia password</button></div>
+      </form>
+      <div class="niche-list-panel">
+        <div class="subheading"><h3>Sessioni attive</h3><span>dispositivi collegati</span></div>
+        <div id="sessions-list" class="sources-list"></div>
+        <button id="revoke-sessions" type="button" class="hub-new-button">Disconnetti gli altri dispositivi</button>
+      </div>
+    </dialog>
+
+    <dialog id="entity-dialog">
+      <form id="entity-form">
+        <div><p class="eyebrow">ENTITÀ</p><h2 id="entity-dialog-title">Crea entità</h2></div>
+        <input id="entity-id" type="hidden">
+        <label><span>NOME</span><input id="entity-name" maxlength="120" placeholder="es. Nike" required></label>
+        <label><span>TIPO</span><select id="entity-type"><option value="brand" selected>Brand / Azienda</option><option value="product">Prodotto / Servizio</option><option value="person">Persona / Creator</option><option value="organization">Organizzazione</option><option value="platform">Piattaforma</option></select></label>
+        <label><span>SETTORE</span><input id="entity-sector" maxlength="80" placeholder="es. Sportswear"></label>
+        <label class="wide"><span>ALIAS (separati da virgola)</span><input id="entity-aliases" placeholder="es. Nike Inc, Nike Running"></label>
+        <p class="dialog-error" id="entity-error"></p>
+        <div class="dialog-actions"><button id="cancel-entity" type="button">Annulla</button><button type="submit">Salva</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="niches-dialog">
+      <form id="niche-form">
+        <div><p class="eyebrow" id="niche-dialog-eyebrow">NUOVA NICCHIA</p><h2 id="niche-dialog-title">Definisci un bacino di ricerca</h2></div>
+        <input id="niche-edit-id" type="hidden">
+        <label><span>NOME</span><input id="niche-name" maxlength="80" placeholder="es. Corsa amatoriale" required></label>
+        <label><span>DESCRIZIONE</span><textarea id="niche-description" maxlength="300" placeholder="Perimetro e obiettivo della nicchia"></textarea></label>
+        <label><span>STATO</span><select id="niche-status"><option value="draft">Bozza</option><option value="active" selected>Attiva</option><option value="archived">Archiviata</option></select></label>
+        <label class="wide"><span>CANALI SEME (uno per riga: ID UC..., @handle o URL)</span><textarea id="niche-channels" rows="3" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx&#10;@marcelloascani&#10;https://youtube.com/@marcelloascani"></textarea></label>
+        <label class="wide"><span>VIDEO SEME (uno per riga, URL o ID)</span><textarea id="niche-videos" rows="3" placeholder="https://youtu.be/...&#10;dQw4w9WgXcQ"></textarea></label>
+        <label class="wide"><span>KEYWORD INCLUSE</span><input id="niche-include" placeholder="allenamento, principianti, scarpe"></label>
+        <label class="wide"><span>KEYWORD ESCLUSE</span><input id="niche-exclude" placeholder="maratona, professionisti"></label>
+        <fieldset class="geo-filters wide">
+          <legend>PERIMETRO GEO-LINGUISTICO (opzionale)</legend>
+          <label><span>REGIONE (es. IT)</span><input id="niche-region" maxlength="2" placeholder="IT"></label>
+          <label><span>LINGUA (es. it)</span><input id="niche-language" maxlength="2" placeholder="it"></label>
+          <label><span>MIN ISCRITTI CANALE</span><input id="niche-min-subs" type="number" min="0" value="0"></label>
+          <label><span>POPOLARI REGIONALI</span><select id="niche-popular"><option value="false" selected>Solo seed</option><option value="true">Includi i video più popolari nella regione</option></select></label>
+          <label class="wide"><span>CANALI FUORI PERIMETRO</span><select id="niche-strict"><option value="false" selected>Ammessi, con rilevanza ridotta</option><option value="true">Esclusi se paese o lingua dichiarati non corrispondono</option></select></label>
+        </fieldset>
+        <label class="wide"><span>COMMENTI AUTO</span><select id="niche-auto-comments"><option value="true" selected>Acquisisci automaticamente i commenti dai video trovati</option><option value="false">Solo video, nessun commento</option></select></label>
+        <label><span>MAX VIDEO CON COMMENTI</span><select id="niche-max-comment-videos"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option></select></label>
+        <label><span>COMMENTI / VIDEO</span><select id="niche-comments-per-video"><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="200">200</option></select></label>
+        <label class="wide"><span>INCLUDI RISPOSTE</span><select id="niche-include-replies"><option value="false" selected>No, solo top-level</option><option value="true">Sì, includi risposte</option></select></label>
+        <p class="dialog-error" id="niche-error"></p>
+        <div class="dialog-actions"><button id="cancel-niche" type="button">Annulla</button><button id="niche-submit" type="submit">Crea nicchia</button></div>
+      </form>
+      <div class="niche-list-panel">
+        <div class="subheading"><h3>Nicchie del progetto</h3></div>
+        <div id="niche-entities-list" class="sources-list"></div>
+      </div>
+    </dialog>
+
+    <details class="source-panel">
+      <summary><span><i id="youtube-dot"></i> FONTE DATI</span><strong>Costruisci un dataset da YouTube</strong><small id="youtube-status">Verifica configurazione...</small><small id="quota-status"></small></summary>
+      <div class="source-workflows">
+        <section>
+          <p class="eyebrow">COSTRUISCI UN DATASET DI NICCHIA</p>
+          <form id="youtube-discover-form">
+            <label class="wide"><span>QUERY DI RICERCA</span><input id="discover-query" placeholder="es. allenamento corsa principianti" required></label>
+            <label><span>NICCHIA</span><input id="discover-niche" placeholder="es. Corsa amatoriale" required></label>
+            <label><span>ARGOMENTO</span><input id="discover-topic" placeholder="es. Allenamento"></label>
+            <label><span>PERIODO</span><select id="discover-days"><option value="7">7 giorni</option><option value="30" selected>30 giorni</option><option value="90">90 giorni</option><option value="365">1 anno</option></select></label>
+            <label><span>VIDEO</span><select id="discover-limit"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option></select></label>
+            <button id="discover-submit" type="submit">Cerca e acquisisci →</button>
+            <small class="cost-hint">Costo stimato: ~101 unità di quota (1 ricerca + dettagli video)</small>
+          </form>
+        </section>
+        <section>
+          <p class="eyebrow">APPROFONDISCI UN VIDEO</p>
+          <form id="youtube-form">
+            <label class="wide"><span>URL O ID VIDEO</span><input id="youtube-video" placeholder="https://youtube.com/watch?v=..." required></label>
+            <label><span>NICCHIA</span><input id="youtube-niche" placeholder="es. Corsa amatoriale" required></label>
+            <label><span>ARGOMENTO</span><input id="youtube-topic" placeholder="es. Recupero"></label>
+            <label><span>COMMENTI</span><select id="youtube-limit"><option value="50">50</option><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select></label>
+            <button id="youtube-submit" type="submit">Importa commenti →</button>
+            <small class="cost-hint">Costo stimato: ~2-7 unità di quota in base ai commenti richiesti</small>
+          </form>
+          <form id="bulk-comments-form" class="bulk-form">
+            <p>Oppure acquisisci i commenti dai video più osservati del progetto.</p>
+            <label><span>NUMERO VIDEO</span><select id="bulk-video-limit"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select></label>
+            <label><span>COMMENTI / VIDEO</span><select id="bulk-comment-limit"><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select></label>
+            <button id="bulk-comments-submit" type="submit">Acquisisci dal corpus →</button>
+            <small class="cost-hint">Costo stimato: ~3 unità di quota per video</small>
+          </form>
+        </section>
+      </div>
+      <div class="source-message" id="source-message">La chiave API rimane sul server. Gli identificativi autore vengono pseudonimizzati prima del salvataggio.</div>
+      <div class="sources-panel"><div class="subheading"><h3>Fonti monitorate</h3><span>aggiornamento automatico</span></div><div id="sources-list" class="sources-list"></div></div>
+      <div class="job-panel"><div class="subheading"><h3>Attività in background</h3><span>coda persistente</span></div><div id="job-list" class="job-list"></div></div>
+    </details>
+
+    <section class="export-bar">
+      <span>OUTPUT DEL PROGETTO</span>
+      <button id="export-contents" type="button">Contenuti CSV</button>
+      <button id="export-comments" type="button">Commenti CSV</button>
+      <button id="print-report" type="button">Stampa report</button>
+    </section>
+
+    <section id="onboarding-panel" class="onboarding-panel" hidden>
+      <div class="onboarding-content">
+        <p class="eyebrow">INIZIA</p>
+        <h2>Questo progetto è vuoto</h2>
+        <p>Per osservare una conversazione devi prima definire una nicchia, poi espandere il bacino di contenuti e acquisire i commenti.</p>
+        <ol class="onboarding-steps">
+          <li>
+            <strong>Definisci la nicchia</strong>
+            <small>Canali, video e keyword che descrivono il bacino.</small>
+            <button id="onboarding-create-niche" type="button">Popola il progetto</button>
+          </li>
+          <li>
+            <strong>Espandi il bacino</strong>
+            <small>Cerca video correlati a partire dai seed.</small>
+          </li>
+          <li>
+            <strong>Acquisisci commenti</strong>
+            <small>Raccogli i commenti pubblici dai video trovati.</small>
+          </li>
+          <li>
+            <strong>Analizza</strong>
+            <small>Sentiment, intent e sovrapposizioni tra canali.</small>
+          </li>
+        </ol>
+        <div id="onboarding-youtube-warning" class="onboarding-warning" hidden>
+          <p>Per espandere il bacino da YouTube configura <code>YOUTUBE_API_KEY</code> nel file <code>.env</code> e riavvia il server.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="overview-intro" aria-labelledby="overview-data-title">
+      <div class="module-label"><span>MODULO 01</span> OSSERVATORIO</div>
+      <div class="section-heading">
+        <div><p class="eyebrow">SEGNALI DI SINTESI</p><h2 id="overview-data-title">Quanto e come si muove la conversazione</h2></div>
+        <p>Una vista iniziale per misurare il corpus<br>e decidere dove approfondire.</p>
+      </div>
+      <div class="module-guide compact-guide">
+        <div><span>INDIVIDUA</span><strong>Scala e segnali fuori norma</strong><p>Commenti, autori pseudonimi, ripetizioni e finestre di attività anomala.</p></div>
+        <div><span>COME NASCE</span><strong>Commenti acquisiti nel periodo</strong><p>Conteggi osservati e regole trasparenti applicate al testo normalizzato.</p></div>
+        <div><span>TI AIUTA A</span><strong>Stabilire la priorità</strong><p>Capire se il campione è sufficiente e quali eventi meritano una verifica.</p></div>
+      </div>
+    </section>
+    <section class="metrics" id="metrics" aria-label="Indicatori sintetici dell'osservatorio"></section>
+
+    <section id="landscape" class="landscape-section">
+      <div class="module-label"><span>MODULO 02</span> CONTENT LANDSCAPE</div>
+      <div class="section-heading">
+        <div><p class="eyebrow blue">CONTENUTI PUBBLICI</p><h2>Struttura della nicchia</h2></div>
+        <div class="refresh-box"><small id="last-updated">Ultimo snapshot: --</small><button id="refresh-metrics" type="button">Aggiorna metriche</button></div>
+      </div>
+      <div class="module-guide">
+        <div><span>INDIVIDUA</span><strong>Composizione e performance del corpus</strong><p>Canali, temi, formati, linguaggio e contenuti che emergono nel perimetro raccolto.</p></div>
+        <div><span>COME NASCE</span><strong>Metadata pubblici + snapshot</strong><p>Titoli, descrizioni, tag, durata e metriche correnti aggregati per periodo e nicchia.</p></div>
+        <div><span>TI AIUTA A</span><strong>Orientare contenuti e ricerca</strong><p>Capire cosa approfondire, quali canali confrontare e dove il campione è più attivo.</p></div>
+      </div>
+      <div class="content-metrics" id="content-metrics"></div>
+      <div class="content-grid">
+        <div class="volume-panel"><div class="subheading"><h3>Volume pubblicato</h3><span>reach corrente per data</span></div><p class="panel-note">L'altezza mostra le views cumulative attuali dei contenuti pubblicati in quella data; il numero indica quanti contenuti.</p><div class="content-chart" id="content-chart"></div></div>
+        <div class="topic-panel"><div class="subheading"><h3>Argomenti nel campione</h3><span>numero contenuti</span></div><p class="panel-note">Etichette associate in acquisizione o derivate dalla query: descrivono il corpus, non temi scoperti semanticamente.</p><div class="landscape-topics" id="landscape-topics"></div></div>
+      </div>
+      <div class="content-signals">
+        <div><div class="subheading"><h3>Linguaggio ricorrente</h3><span>presenza nei documenti</span></div><p class="panel-note">Parole presenti in più titoli e descrizioni: utili per riconoscere lessico e formule editoriali ricorrenti.</p><div class="term-cloud" id="term-cloud"></div></div>
+        <div><div class="subheading"><h3>Distribuzione durate</h3><span>numero contenuti</span></div><p class="panel-note">Mostra il mix tra formati brevi, medi e lunghi nel campione acquisito.</p><div class="duration-list" id="duration-list"></div></div>
+        <div><div class="subheading"><h3>Provenienza del corpus</h3><span>query acquisite</span></div><p class="panel-note">Rende visibile quali ricerche hanno costruito il campione e quanto pesano sul risultato.</p><div class="query-list" id="query-list"></div></div>
+      </div>
+      <div class="taxonomy-grid">
+        <div><div class="subheading"><h3>Formati stimati</h3><span>proxy basato sulla durata</span></div><div id="format-taxonomy" class="taxonomy-list"></div></div>
+        <div><div class="subheading"><h3>Scopo dei contenuti</h3><span>classificazione multi-etichetta</span></div><div id="purpose-taxonomy" class="taxonomy-list"></div></div>
+        <div><div class="subheading"><h3>Tag dichiarati</h3><span>metadati YouTube</span></div><div id="tag-taxonomy" class="term-cloud"></div></div>
+      </div>
+      <div class="commercial-panel" id="commercial-panel">
+        <div>
+          <p class="eyebrow alert">SEGNALI COMMERCIALI</p>
+          <h3>Possibili sponsor e affiliazioni</h3>
+          <small>Indicatori testuali da verificare, non attribuzioni definitive.</small>
+          <button id="expand-adv" type="button" class="expand-adv-button">Espandi analisi adv →</button>
+        </div>
+        <div id="commercial-list" class="commercial-list"></div>
+      </div>
+      <div class="relationship-lab">
+        <div class="graph-panel">
+          <div class="subheading"><h3>Grafo delle relazioni osservate</h3><span>nicchia → canale → argomento</span></div>
+          <p class="panel-note">Collega presenze nel dataset: non rappresenta relazioni personali o commerciali tra i nodi.</p>
+          <div class="graph-legend"><span class="niche-dot">Nicchie</span><span class="channel-dot">Canali</span><span class="topic-dot">Argomenti</span><small>Passa sui nodi per isolare le relazioni</small></div>
+          <svg id="relationship-graph" viewBox="0 0 900 420" role="img" aria-label="Grafo delle relazioni del corpus"></svg>
+        </div>
+        <div class="bridge-panel">
+          <div class="subheading"><h3>Ponti tra nicchie</h3><span>presenza osservata</span></div>
+          <p class="panel-note">Canali o argomenti presenti in almeno due nicchie, utili per scoprire territori editoriali adiacenti.</p>
+          <div id="bridge-list" class="bridge-list"></div>
+        </div>
+      </div>
+      <div class="channel-overlap-panel">
+        <div class="subheading"><h3>Sovrapposizione del pubblico osservato</h3><span>tra canali · proxy dai commentatori</span></div>
+        <p class="panel-note important">Misura autori pseudonimi condivisi nei commenti acquisiti. Non equivale alla sovrapposizione di viewer o subscriber.</p>
+        <div id="channel-overlap-list" class="bridge-list"></div>
+      </div>
+      <div class="platform-lab">
+        <div class="subheading"><h3>Osservatorio multipiattaforma</h3><span>metriche dichiarate dalle fonti</span></div>
+        <p class="panel-note important">Views e interazioni possono avere definizioni diverse tra piattaforme: confronta la composizione, non sommare i valori come equivalenti.</p>
+        <div id="platform-grid" class="platform-grid"></div>
+        <div id="platform-comparison" class="platform-comparison"></div>
+      </div>
+      <div class="content-comparison" id="content-comparison"></div>
+      <div class="growth-monitor">
+        <div class="subheading"><h3>Traiettorie osservate</h3><span>variazione tra il primo e l'ultimo snapshot</span></div>
+        <p class="panel-note">Confronta almeno due rilevazioni dello stesso contenuto per distinguere reach attuale e velocità di crescita.</p>
+        <div id="trajectory-list" class="trajectory-list"></div>
+      </div>
+      <div class="monitoring-history">
+        <div><p class="eyebrow">MONITORAGGIO</p><h3 id="monitoring-status">Verifica scheduler...</h3></div>
+        <div id="monitoring-runs" class="monitoring-runs"></div>
+      </div>
+      <div class="split-grid content-lists">
+        <div><div class="subheading"><h3>Contenuti più osservati</h3><span>metriche pubbliche</span></div><p class="panel-note">Ranking per views cumulative correnti: descrive la reach osservata, non la crescita nel periodo.</p><div id="top-content-list" class="evidence-list"></div></div>
+        <div><div class="subheading"><h3>Canali nel dataset</h3><span>volume aggregato</span></div><p class="panel-note">Somma e media dei contenuti acquisiti per canale, dipendenti dalla copertura del corpus.</p><div id="channel-list" class="evidence-list"></div></div>
+      </div>
+    </section>
+
+    <section id="adv" class="adv-section">
+      <div class="module-label"><span>MODULO 03</span> ADV INTELLIGENCE</div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow alert">PUBBLICITÀ DIRETTA E INDIRETTA</p>
+          <h2>Scopri sponsor, aziende e nicchie indirette</h2>
+        </div>
+        <p>La nicchia può essere ricostruita a partire da chi fa pubblicità.<br>Analisi indiretta da sponsor, video e canali con segnali commerciali.</p>
+      </div>
+
+      <div class="module-guide adv-guide">
+        <div><span>INDIVIDUA</span><strong>Relazioni commerciali osservabili</strong><p>Brand, creator, nicchie e contenuti collegati da disclosure, menzioni e altri segnali ADV.</p></div>
+        <div><span>COME NASCE</span><strong>Regole + entità curate</strong><p>Pattern testuali e menzioni estratte vengono aggregati; ogni risultato resta un'ipotesi da validare.</p></div>
+        <div><span>TI AIUTA A</span><strong>Mappare sponsor e opportunità</strong><p>Confrontare bacini creator, scoprire concentrazioni e costruire nuove nicchie di monitoraggio.</p></div>
+      </div>
+
+      <div class="adv-metrics" id="adv-metrics"></div>
+
+      <div class="entity-manager">
+        <div class="subheading"><h3>Entity Manager</h3><span>cura sponsor, brand e creator estratti</span></div>
+        <p class="panel-note">Normalizza nomi e alias prima dell'aggregazione. La revisione analista migliora direttamente la qualità del report ADV.</p>
+        <div class="entity-actions">
+          <button id="extract-entities" type="button">Estrai entità dal corpus</button>
+          <button id="new-entity" type="button">Crea entità</button>
+        </div>
+        <div class="entity-list" id="entity-list"></div>
+      </div>
+
+      <section id="sponsor-basin" class="sponsor-basin" hidden aria-live="polite">
+        <div class="sponsor-basin-heading">
+          <div><p class="eyebrow alert">BACINO SPONSOR</p><h3 id="sponsor-basin-title">Profilo del brand</h3><p id="sponsor-basin-subtitle"></p></div>
+          <button id="close-sponsor-basin" type="button" aria-label="Chiudi dettaglio bacino">Chiudi</button>
+        </div>
+        <div id="sponsor-basin-content"></div>
+        <form id="sponsor-niche-form" class="sponsor-niche-form" hidden>
+          <label><span>NOME DELLA NUOVA NICCHIA</span><input id="sponsor-niche-name" maxlength="80" required></label>
+          <button id="create-sponsor-niche" type="submit">Crea nicchia da questo brand</button>
+          <small id="sponsor-niche-status" role="status"></small>
+        </form>
+      </section>
+
+      <div class="adv-controls">
+        <label><span>PERIODO</span><select id="adv-period"><option value="30">30 giorni</option><option value="60">60 giorni</option><option value="90" selected>90 giorni</option><option value="180">6 mesi</option><option value="365">1 anno</option></select></label>
+        <label><span>NICCHIA</span><select id="adv-niche"><option value="">Tutte le nicchie</option></select></label>
+        <form id="adv-search-form" class="adv-search-form">
+          <label class="wide"><span>CERCA AZIENDA / SPONSOR / CANALE</span><input id="adv-search-input" type="search" placeholder="es. Nike, Amazon, Gymshark..." required></label>
+          <button type="submit">Cerca →</button>
+        </form>
+        <button id="adv-refresh" type="button">Aggiorna report</button>
+      </div>
+
+      <div class="sponsor-discovery-grid">
+        <section class="adv-panel niche-brand-panel">
+          <div class="subheading"><h3>Brand nella nicchia</h3><span>quota sui contenuti sponsorizzati</span></div>
+          <p class="panel-note">Quota delle associazioni brand-contenuto rilevate nel campione, non quota di spesa o di mercato.</p>
+          <div id="niche-brand-list" class="niche-brand-list"></div>
+        </section>
+        <section class="adv-panel sponsor-compare-panel">
+          <div class="subheading"><h3>Confronta due brand</h3><span>bacini di canali osservati</span></div>
+          <p class="panel-note">Confronta i set di canali associati ai due brand e mette in evidenza sovrapposizioni ed esclusività.</p>
+          <div class="sponsor-compare-controls">
+            <label><span>BRAND A</span><select id="sponsor-compare-left"><option value="">Seleziona un brand</option></select></label>
+            <label><span>BRAND B</span><select id="sponsor-compare-right"><option value="">Seleziona un brand</option></select></label>
+            <button id="sponsor-compare-button" type="button">Confronta brand</button>
+          </div>
+        </section>
+      </div>
+      <section id="sponsor-comparison" class="sponsor-comparison" aria-live="polite">
+        <p class="empty">Seleziona due brand per confrontare i rispettivi bacini.</p>
+      </section>
+
+      <div class="adv-grid">
+        <div class="adv-panel">
+          <div class="subheading"><h3>Sponsor e aziende più presenti</h3><span>per contenuti con segnali adv</span></div>
+          <p class="panel-note">Ordina per frequenza osservata nel corpus; le views sono pubbliche e non attribuibili allo sponsor.</p>
+          <div id="adv-top-sponsors" class="adv-sponsor-list"></div>
+        </div>
+        <div class="adv-panel">
+          <div class="subheading"><h3>Aziende per nicchia</h3><span>estrazione dai contenuti</span></div>
+          <div id="adv-sponsors-by-niche" class="adv-niche-sponsors"></div>
+        </div>
+      </div>
+
+      <div class="adv-grid">
+        <div class="adv-panel">
+          <div class="subheading"><h3>Canali con più sponsor</h3><span>incrocio canali × sponsor</span></div>
+          <p class="panel-note">Evidenzia creator con maggiore varietà commerciale nel campione analizzato.</p>
+          <div id="adv-channel-sponsors" class="adv-channel-list"></div>
+        </div>
+        <div class="adv-panel">
+          <div class="subheading"><h3>Ponti tra nicchie</h3><span>sponsor che attraversano più nicchie</span></div>
+          <div id="adv-cross-bridges" class="adv-bridge-list"></div>
+        </div>
+      </div>
+
+      <div class="adv-panel adv-wide">
+        <div class="subheading"><h3>Nicchie indirette</h3><span>bacini ricostruiti da uno sponsor e dai suoi canali</span></div>
+        <p class="panel-note">Raggruppa i canali associati allo stesso sponsor per osservare territori contigui, non segmenti di mercato completi.</p>
+        <div id="adv-indirect-niches" class="adv-indirect-list"></div>
+      </div>
+
+      <div class="adv-panel adv-wide">
+        <div class="subheading"><h3>Andamento contenuti adv</h3><span>volumi e views per mese</span></div>
+        <p class="panel-note">Mostra contenuti rilevati e views pubbliche aggregate; non misura investimento, impression sponsorizzate o ROI.</p>
+        <div id="adv-trends" class="adv-trend-chart"></div>
+      </div>
+
+      <div class="adv-panel adv-wide">
+        <div class="subheading"><h3>Contenuti con segnali commerciali</h3><span>ultimi 50 rilevati</span></div>
+        <p class="panel-note important">È una coda di verifica: apri le evidenze originali prima di attribuire una relazione commerciale.</p>
+        <div id="adv-content-list" class="adv-content-list"></div>
+      </div>
+
+      <div id="adv-search-results" class="adv-search-results" hidden>
+        <div class="subheading"><h3>Risultati ricerca sponsor</h3><span id="adv-search-summary"></span></div>
+        <div id="adv-search-matches" class="adv-content-list"></div>
+        <div class="adv-grid">
+          <div class="adv-panel">
+            <div class="subheading"><h3>Canali trovati</h3></div>
+            <div id="adv-search-channels" class="adv-channel-list"></div>
+          </div>
+          <div class="adv-panel">
+            <div class="subheading"><h3>Nicchie trovate</h3></div>
+            <div id="adv-search-niches" class="adv-niche-list"></div>
+          </div>
+        </div>
+        <div class="adv-panel adv-wide">
+          <div class="subheading"><h3>Andamento ricerca</h3></div>
+          <div id="adv-search-trends" class="adv-trend-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="activity-section">
+      <div class="section-heading">
+        <div><p class="eyebrow">RITMO DEL PUBBLICO</p><h2>Quando si attiva la conversazione</h2></div>
+        <p id="peak-copy">Calcolo della fascia più attiva...</p>
+      </div>
+      <div class="module-guide compact-guide">
+        <div><span>INDIVIDUA</span><strong>Quando arrivano i commenti</strong><p>Distribuzione oraria e settimanale nel campione acquisito.</p></div>
+        <div><span>LETTURA CORRETTA</span><strong>Attività osservata, non audience totale</strong><p>Il dato usa i timestamp UTC e dipende dalla quantità e dalla finestra dei commenti raccolti.</p></div>
+        <div><span>TI AIUTA A</span><strong>Scegliere finestre operative</strong><p>Orari da presidiare per pubblicazione, risposta e moderazione.</p></div>
+      </div>
+      <div class="activity-card">
+        <div class="chart" id="hour-chart"></div>
+        <div class="day-list" id="day-list"></div>
+      </div>
+    </section>
+
+    <section id="integrity">
+      <div class="module-label"><span>MODULO 04</span> INTEGRITY MONITOR</div>
+      <div class="section-heading">
+        <div><p class="eyebrow alert">EVENTI DA VERIFICARE</p><h2>Timeline delle anomalie</h2></div>
+        <p>Il sistema mostra indicatori ed evidenze.<br>Non classifica definitivamente gli utenti come bot.</p>
+      </div>
+      <div class="module-guide integrity-guide">
+        <div><span>INDIVIDUA</span><strong>Pattern insoliti da verificare</strong><p>Picchi temporali, testi ripetuti e comportamenti che superano soglie esplicite.</p></div>
+        <div><span>COME NASCE</span><strong>Regole deterministiche</strong><p>Confronti con baseline del corpus e punteggi euristici, non probabilità calibrate.</p></div>
+        <div><span>TI AIUTA A</span><strong>Creare una coda d'indagine</strong><p>Porta l'attenzione sui casi prioritari mantenendo separate evidenza e interpretazione.</p></div>
+      </div>
+      <div class="nlp-panel">
+        <div class="subheading"><h3>Analisi testuale dei commenti</h3><span>sentiment e intento stimati</span></div>
+        <p class="panel-note important">Baseline lessicale spiegabile: utile per orientarsi, non per classificare automaticamente singoli utenti o commenti.</p>
+        <button id="analyze-comments" type="button">Avvia analisi commenti</button>
+        <div id="nlp-summary"></div>
+      </div>
+      <div id="event-list" class="event-list"></div>
+
+      <div class="split-grid">
+        <div>
+          <div class="subheading"><h3>Testi ripetuti</h3><span>corrispondenza normalizzata esatta</span></div>
+          <p class="panel-note">Testi uguali dopo normalizzazione di maiuscole, URL e punteggiatura; non include parafrasi semantiche.</p>
+          <div id="cluster-list" class="evidence-list"></div>
+        </div>
+        <div>
+          <div class="subheading"><h3>Account da approfondire</h3><span>indicatori combinati</span></div>
+          <p class="panel-note">Priorità euristica basata su frequenza, ripetizioni, ampiezza e prossimità temporale.</p>
+          <div id="author-list" class="evidence-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="niches">
+      <div class="module-label"><span>MODULO 05</span> NICHE EXPLORER</div>
+      <div class="section-heading">
+        <div><p class="eyebrow blue">COMUNITÀ E INTERESSI</p><h2>Esplora e incrocia le nicchie</h2></div>
+        <p>Le sovrapposizioni sono aggregate<br>e non profilano i singoli utenti.</p>
+      </div>
+      <div class="module-guide niche-guide">
+        <div><span>INDIVIDUA</span><strong>Dimensione e prossimità delle nicchie</strong><p>Commenti, autori osservati, argomenti assegnati e comunità che si intersecano.</p></div>
+        <div><span>COME NASCE</span><strong>Set di commentatori pseudonimi</strong><p>L'overlap è l'intersezione tra autori acquisiti, non una stima di tutti i follower.</p></div>
+        <div><span>TI AIUTA A</span><strong>Confrontare e ampliare il perimetro</strong><p>Decidere quali nicchie unire, separare o usare per nuove ricerche qualitative.</p></div>
+      </div>
+      <div class="compare-controls">
+        <label><span>CONFRONTA</span><select id="compare-left"></select></label>
+        <b>×</b>
+        <label><span>CON</span><select id="compare-right"></select></label>
+        <button id="compare-button" type="button">Confronta nicchie</button>
+      </div>
+      <div class="niche-grid" id="niche-grid"></div>
+      <div class="comparison" id="comparison"></div>
+
+      <div class="search-lab">
+        <div><p class="eyebrow">RICERCA NEL CORPUS</p><h3>Interroga le conversazioni</h3><p>Cerca parole, domande o formule ricorrenti nei commenti acquisiti.</p></div>
+        <form id="search-form"><input id="search-input" type="search" minlength="2" placeholder="es. recupero, proteine, segnalate..." required><button type="submit">Cerca →</button></form>
+        <div class="search-results" id="search-results"><p class="empty">Inserisci almeno due caratteri per iniziare.</p></div>
+      </div>
+    </section>
+
+    <section id="method" class="method">
+      <p class="eyebrow">COME LEGGERE I RISULTATI</p>
+      <h2>Dal dato alla decisione, senza nascondere il metodo.</h2>
+      <p class="method-intro">Ogni modulo separa ciò che proviene dalla fonte da ciò che viene calcolato o stimato. Campione, filtri e copertura determinano sempre la forza del risultato.</p>
+      <div class="method-grid">
+        <div><span>01</span><strong>Osservato</strong><p>Ciò che proviene direttamente dal dataset.</p></div>
+        <div><span>02</span><strong>Calcolato</strong><p>Misure riproducibili ottenute dai dati.</p></div>
+        <div><span>03</span><strong>Stimato</strong><p>Indicatori probabilistici, mai verdetti.</p></div>
+        <div><span>04</span><strong>Interpretato</strong><p>La lettura finale appartiene all'analista.</p></div>
+      </div>
+    </section>
+  </main>
+  <script src="/static/app.js?v=20260918-30"></script>
+</body>
+</html>
